@@ -27,7 +27,8 @@ private:
     size_t tableCount;
     std::deque<std::string> waiting_;
     std::vector<std::optional<std::string>> tables_;
-    std::vector<std::chrono::minutes> placedTableTime;
+    std::vector<std::chrono::minutes> placedTableTime_;
+    std::vector<unsigned long long> summaryCostTables;
     unsigned long long cost;
     void unwrapMetaInfo();
     bool freeTableExists() const;

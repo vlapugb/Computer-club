@@ -33,18 +33,13 @@ void Club::messagesProcesser()
         {
             std::cout << currentEvent.time << " " << static_cast<int>(type) << " " << clientUserName << "\n";
         }
-        if (type == EventType::IN && (eventTime < openTime))
-        {
-            printErrorMessage("NotOpenYet", currentEvent.time);
-            events_.pop_front();
-            continue;
-        }
+
         switch (type)
         {
 
         case EventType::IN:
         {
-            if (eventTime < openTime)
+            if (eventTime < openTime && eventTime >= endTime)
             {
                 printErrorMessage("NotOpenYet", eventTimeStr);
                 events_.pop_front();
@@ -82,27 +77,37 @@ void Club::messagesProcesser()
                 events_.pop_front();
                 continue;
             }
-
+            size_t freedTable = 0;
             if (client.seated)
             {
-                placedTableTime[client.table - 1] += eventTime - client.seatTime;
+                freedTable = client.table;
+                placedTableTime_[client.table - 1] += eventTime - client.seatTime;
                 tables_[client.table - 1] = std::nullopt;
-            }
-
-            if (client.inQueue)
-            {
-                auto it = std::find(waiting_.begin(), waiting_.end(), clientUserName);
-                if (it != waiting_.end())
-                {
-                    waiting_.erase(it);
-                }
-                client.inQueue = false;
+                auto minutes = (eventTime - client.seatTime).count();
+                summaryCostTables[client.table - 1] += ((minutes + 59) / 60) * cost;
             }
 
             client.seated = true;
+            client.inQueue = false;
             client.table = tableNumber;
             client.seatTime = eventTime;
             tables_[tableNumber - 1] = clientUserName;
+
+            if (client.table && !waiting_.empty())
+            {
+                std::string nextClient = waiting_.front();
+                waiting_.pop_front();
+
+                auto &infoNextClient = clients_[nextClient];
+                infoNextClient.inQueue = false;
+                infoNextClient.seated = true;
+                infoNextClient.table = freedTable;
+                infoNextClient.seatTime = eventTime;
+                tables_[freedTable - 1] = nextClient;
+
+                std::cout << eventTimeStr << " 12 " << nextClient
+                          << " " << freedTable << '\n';
+            }
             break;
         }
         case EventType::WAITING:
@@ -146,8 +151,10 @@ void Club::messagesProcesser()
             if (client.seated)
             {
                 freedTable = client.table;
-                placedTableTime[freedTable - 1] += eventTime - client.seatTime;
+                placedTableTime_[freedTable - 1] += eventTime - client.seatTime;
                 tables_[freedTable - 1] = std::nullopt;
+                auto minutes = (eventTime - client.seatTime).count();
+                summaryCostTables[freedTable - 1] += ((minutes + 59) / 60) * cost;
             }
 
             clients_.erase(clientUserName);
@@ -178,7 +185,9 @@ void Club::messagesProcesser()
     {
         if (info.seated)
         {
-            placedTableTime[info.table - 1] += endTime - info.seatTime;
+            auto minutes = (endTime - info.seatTime).count();
+            summaryCostTables[info.table - 1] += ((minutes + 59) / 60) * cost;
+            placedTableTime_[info.table - 1] += endTime - info.seatTime;
         }
         rest.push_back(clientName);
     }
@@ -198,7 +207,8 @@ void Club::unwrapMetaInfo()
     cost = metadata_.cost;
     tableCount = metadata_.tableCount;
     tables_.assign(tableCount, std::nullopt);
-    placedTableTime.assign(tableCount, std::chrono::minutes{0});
+    placedTableTime_.assign(tableCount, std::chrono::minutes{0});
+    summaryCostTables.assign(tableCount, 0ULL);
 }
 
 bool Club::freeTableExists() const
@@ -212,13 +222,9 @@ void Club::countSummary()
 {
     for (size_t i = 0; i < tableCount; ++i)
     {
-        auto mins = placedTableTime[i].count();
-        unsigned long long hours = (mins + 59) / 60;
-        unsigned long long revenue = hours * cost;
-
-        std::cout << i + 1 << " " << revenue << " "
-                  << std::setfill('0') << std::setw(2) << mins / 60 << ":"
-                  << std::setw(2) << mins % 60 << "\n";
+        std::cout << i + 1 << " " << summaryCostTables[i] << " "
+                  << std::setfill('0') << std::setw(2) << placedTableTime_[i].count() / 60
+                  << ":" << std::setw(2) << placedTableTime_[i].count() % 60 << '\n';
     }
 }
 

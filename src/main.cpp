@@ -1,10 +1,10 @@
+#include <iostream>
+
+#include "club.h"
 #include "error_handler.h"
 #include "parser.h"
-#include "club.h"
-#include <iostream> 
-int main (int argc, char** argv) {
-    try
-    {
+int main(int argc, char** argv) {
+    try {
         ErrorHandler errHandler(argc, argv);
 
         Parser parser(errHandler, argv[1]);
@@ -12,9 +12,7 @@ int main (int argc, char** argv) {
         Club club(parser);
         club.run();
         return 0;
-    }
-    catch (...)
-    {
+    } catch (...) {
         return 1;
     }
-}  
+}

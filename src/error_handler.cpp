@@ -1,29 +1,24 @@
 #include "error_handler.h"
 #include "parser.h"
-#include <vector>
 #include <iterator>
+#include <vector>
 
 static const std::regex hhmm(R"(^(?:[01]\d|2[0-3]):[0-5]\d$)");
 static const std::regex client(R"(^[a-z0-9_-]+$)");
 static const std::regex positive(R"(^[1-9][0-9]*$)");
 
-
-
-ErrorHandler::ErrorHandler(int argc, char *argv[])
-{
+ErrorHandler::ErrorHandler(int argc, char* argv[]) {
     if (argc != 2)
         throw std::invalid_argument("Exactly one argument (path to file) is required.");
 }
 
-std::optional<std::error_code> ErrorHandler::tryOpenFile(const std::ifstream &file) const
-{
+std::optional<std::error_code> ErrorHandler::tryOpenFile(const std::ifstream& file) const {
     if (!file.is_open())
         return std::make_error_code(std::errc::no_such_file_or_directory);
     return std::nullopt;
 }
 
-std::optional<std::error_code> ErrorHandler::workingTimeChecker(const std::string &line) const
-{
+std::optional<std::error_code> ErrorHandler::workingTimeChecker(const std::string& line) const {
     std::istringstream iss(line);
     std::string start, finish;
     if (!(iss >> start >> finish))
@@ -41,10 +36,10 @@ std::optional<std::error_code> ErrorHandler::workingTimeChecker(const std::strin
     return std::nullopt;
 }
 
-std::optional<std::error_code> ErrorHandler::eventChecker(const std::string &eventLine) const
-{
+std::optional<std::error_code> ErrorHandler::eventChecker(const std::string& eventLine) const {
     std::istringstream iss(eventLine);
-    std::vector<std::string> tok{std::istream_iterator<std::string>(iss), std::istream_iterator<std::string>()};
+    std::vector<std::string> tok{std::istream_iterator<std::string>(iss),
+                                 std::istream_iterator<std::string>()};
 
     if (tok.size() < 3)
         return std::make_error_code(std::errc::invalid_argument);

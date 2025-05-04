@@ -4,7 +4,7 @@
 #include <vector>
 
 static const std::regex hhmm(R"(^(?:[01]\d|2[0-3]):[0-5]\d$)");
-static const std::regex client(R"(^[a-z0-9_-]+$)");
+static const std::regex client(R"(^[a-z0-9_-]+$)", std::regex_constants::icase);
 static const std::regex positive(R"(^[1-9][0-9]*$)");
 
 ErrorHandler::ErrorHandler(int argc, char* argv[]) {

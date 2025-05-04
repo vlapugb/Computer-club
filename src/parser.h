@@ -70,7 +70,7 @@ class Parser {
         ValueType value;
 
         auto [ptr, ec] = std::from_chars(str.data(), str.data() + str.size(), value);
-        if (ec != std::errc()) {
+        if (ec != std::errc() || ptr != str.data() + str.size()) {
             throw std::invalid_argument("bad numeric value: " + str);
         }
 

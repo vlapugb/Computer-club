@@ -98,7 +98,7 @@ void Parser::parseFile() {
 
 void Parser::flushBuffer() const {
     if (!buffer_.empty())
-        std::cout << buffer_.back() << '\n';
+        std::cout << buffer_.back() << "\n";
 }
 
 int64_t toMinutes(const std::string& time) {

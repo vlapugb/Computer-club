@@ -87,7 +87,7 @@ void Club::messagesProcesser() {
                 infoNextClient.seatTime = eventTime;
                 tables_[freedTable - 1] = nextClient;
 
-                std::cout << eventTimeStr << " 12 " << nextClient << " " << freedTable << '\n';
+                std::cout << eventTimeStr << " 12 " << nextClient << " " << freedTable << "\n";
             }
             break;
         }
@@ -188,7 +188,7 @@ void Club::countSummary() {
     for (size_t i = 0; i < tableCount; ++i) {
         std::cout << i + 1 << " " << summaryCostTables[i] << " " << std::setfill('0')
                   << std::setw(2) << placedTableTime_[i].count() / 60 << ":" << std::setw(2)
-                  << placedTableTime_[i].count() % 60 << '\n';
+                  << placedTableTime_[i].count() % 60 << "\n";
     }
 }
 
